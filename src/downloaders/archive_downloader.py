@@ -8,8 +8,8 @@ from asyncio_throttle import Throttler
 from tqdm import tqdm
 import time
 
-from ..utils.url_validator import URLValidator
-from ..utils.file_manager import FileManager
+from src.utils.url_validator import URLValidator
+from src.utils.file_manager import FileManager
 
 logger = logging.getLogger(__name__)
 

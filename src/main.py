@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 from colorama import init, Fore, Style
 
-from downloaders.archive_downloader import ArchiveDownloader
+from src.downloaders.archive_downloader import ArchiveDownloader
 
 # Colorama'yı başlat
 init()
