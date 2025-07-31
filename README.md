@@ -4,6 +4,7 @@ Bu uygulama, domain listesindeki her domain için `/Archive.zip` dosyasını ind
 
 ## Özellikler
 
+### İndirme Modülü
 - ✅ **Modüler Yapı**: Her modül bağımsız ve özel işlevlere sahip
 - ✅ **Eşzamanlı İndirme**: 10 worker ile hızlı indirme
 - ✅ **Akıllı URL Testi**: Önce HTTPS, sonra HTTP dener
@@ -11,6 +12,13 @@ Bu uygulama, domain listesindeki her domain için `/Archive.zip` dosyasını ind
 - ✅ **Detaylı Loglama**: Tüm işlemler loglanır
 - ✅ **Progress Bar**: Gerçek zamanlı ilerleme gösterimi
 - ✅ **Hata Yönetimi**: Kapsamlı hata yakalama ve raporlama
+
+### Varlık Kontrol Modülü
+- ✅ **Hızlı Kontrol**: Sadece HEAD isteği ile varlık kontrolü
+- ✅ **Yüksek Performans**: 50+ worker ile çok hızlı kontrol
+- ✅ **Sonuç Kaydetme**: Bulunan domain'leri txt dosyasına kaydeder
+- ✅ **İstatistik Raporu**: Detaylı kontrol istatistikleri
+- ✅ **Özelleştirilebilir**: Worker sayısı ve timeout ayarlanabilir
 
 ## Kurulum
 
@@ -51,12 +59,14 @@ echo "test.com" >> data/domains/domains.txt
 
 ## Kullanım
 
-### Temel Kullanım
+### 1. Archive.zip İndirme
+
+#### Temel Kullanım
 ```bash
 PYTHONPATH=. python3 src/main.py domains.txt
 ```
 
-### Gelişmiş Kullanım
+#### Gelişmiş Kullanım
 ```bash
 # 20 worker ile çalıştır
 PYTHONPATH=. python3 src/main.py domains.txt --workers 20
@@ -68,6 +78,25 @@ PYTHONPATH=. python3 src/main.py domains.txt --timeout 60
 PYTHONPATH=. python3 src/main.py domains.txt --workers 15 --timeout 45
 ```
 
+### 2. Archive.zip Varlık Kontrolü
+
+#### Temel Kullanım
+```bash
+PYTHONPATH=. python3 src/check_archives.py domains.txt
+```
+
+#### Gelişmiş Kullanım
+```bash
+# 50 worker ile hızlı kontrol
+PYTHONPATH=. python3 src/check_archives.py domains.txt --workers 50
+
+# 5 saniye timeout ile hızlı kontrol
+PYTHONPATH=. python3 src/check_archives.py domains.txt --timeout 5
+
+# Özel çıktı dosyası
+PYTHONPATH=. python3 src/check_archives.py domains.txt --output my_results.txt
+```
+
 ## Proje Yapısı
 
 ```
@@ -77,11 +106,14 @@ Archive/
 │   │   └── archive_downloader.py    # Ana indirme modülü
 │   ├── utils/
 │   │   ├── file_manager.py          # Dosya yönetimi
-│   │   └── url_validator.py         # URL doğrulama
-│   └── main.py                      # Ana uygulama
+│   │   ├── url_validator.py         # URL doğrulama
+│   │   └── archive_checker.py       # Varlık kontrol modülü
+│   ├── main.py                      # İndirme uygulaması
+│   └── check_archives.py            # Varlık kontrol uygulaması
 ├── data/
 │   ├── domains/                     # Domain listeleri
-│   └── downloads/                   # İndirilen dosyalar
+│   ├── downloads/                   # İndirilen dosyalar
+│   └── results/                     # Kontrol sonuçları
 ├── logs/                            # Log dosyaları
 ├── requirements.txt                  # Python bağımlılıkları
 └── README.md                        # Bu dosya
@@ -126,6 +158,7 @@ data/downloads/
 
 ## Örnek Çıktı
 
+### İndirme Modülü
 ```
 ╔══════════════════════════════════════════════════════════════╗
 ║                    Archive.zip İndirici v1.0                    ║
@@ -152,6 +185,36 @@ data/downloads/
 📈 Başarı Oranı: 70.0%
 
 🎉 İndirilen dosyalar 'data/downloads/' klasöründe bulunabilir
+```
+
+### Varlık Kontrol Modülü
+```
+╔══════════════════════════════════════════════════════════════╗
+║                Archive.zip Varlık Kontrolcüsü v1.0                ║
+║                                                                  ║
+║  • Domain listesinde Archive.zip varlığını kontrol eder         ║
+║  • Önce HTTPS, sonra HTTP dener                                 ║
+║  • İndirme yapmaz, sadece kontrol eder                          ║
+║  • Sonuçları txt dosyasına kaydeder                             ║
+╚══════════════════════════════════════════════════════════════╝
+
+📋 Domain dosyası: domains.txt
+🔧 Worker sayısı: 50
+⏱️  Zaman aşımı: 5 saniye
+📄 Çıktı dosyası: available_archives.txt
+══════════════════════════════════════════════════════════════
+
+Kontrol ediliyor: 100%|██████████| 1000/1000 [00:45<00:00, 22.22domain/s]
+
+══════════════════════════════════════════════════════════════
+📊 KONTROL İSTATİSTİKLERİ
+══════════════════════════════════════════════════════════════
+📁 Toplam Domain: 1000
+✅ Archive.zip Bulunan: 150
+❌ Archive.zip Bulunamayan: 850
+📈 Bulunma Oranı: 15.0%
+
+🎉 Sonuçlar 'data/results/available_archives.txt' dosyasına kaydedildi
 ```
 
 ## Geliştirme
