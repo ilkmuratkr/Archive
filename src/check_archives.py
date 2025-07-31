@@ -22,6 +22,9 @@ init()
 # Logging yapılandırması
 def setup_logging():
     """Logging yapılandırmasını ayarlar"""
+    # Logs klasörünü oluştur
+    Path("logs").mkdir(exist_ok=True)
+    
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
