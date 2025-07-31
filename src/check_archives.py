@@ -133,8 +133,7 @@ async def main():
             # Tüm domain'leri kontrol et
             results = await checker.check_all_domains(domains)
             
-            # Sonuçları kaydet
-            await checker.save_results(results, args.output)
+            # Sonuçlar zaten anlık olarak kaydedildi, sadece istatistikleri hesapla
             
             # İstatistikleri hesapla
             stats = checker.get_stats(len(domains), len(results))

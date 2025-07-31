@@ -50,8 +50,35 @@ class ArchiveChecker:
                 async with self.throttler:
                     async with self.session.head(url, allow_redirects=True) as response:
                         if response.status == 200:
-                            logger.info(f"✅ Archive.zip bulundu: {domain} - {url}")
-                            return True, url, None
+                            # MIME type kontrolü yap
+                            content_type = response.headers.get('content-type', '').lower()
+                            
+                            # Archive.zip için geçerli MIME type'lar
+                            valid_mime_types = [
+                                'application/zip',
+                                'application/x-zip-compressed',
+                                'application/octet-stream',
+                                'binary/octet-stream',
+                                'application/force-download'
+                            ]
+                            
+                            # Content-Length kontrolü (çok küçük dosyalar şüpheli)
+                            content_length = response.headers.get('content-length')
+                            if content_length:
+                                size = int(content_length)
+                                if size < 1024:  # 1KB'dan küçük dosyalar şüpheli
+                                    logger.debug(f"❌ Çok küçük dosya: {domain} - {size} bytes")
+                                    continue
+                            
+                            # MIME type kontrolü
+                            is_valid_mime = any(mime in content_type for mime in valid_mime_types)
+                            
+                            if is_valid_mime or 'zip' in content_type or 'archive' in content_type:
+                                logger.info(f"✅ Archive.zip bulundu: {domain} - {url} (MIME: {content_type})")
+                                return True, url, None
+                            else:
+                                logger.debug(f"❌ Geçersiz MIME type: {domain} - {content_type}")
+                                
                         else:
                             logger.debug(f"❌ Archive.zip yok: {domain} - HTTP {response.status}")
                             
@@ -93,7 +120,10 @@ class ArchiveChecker:
                 exists, url, error = await task
                 
                 if exists:
-                    found_archives.append((url.split('/')[2], url))  # domain, url
+                    domain = url.split('/')[2]
+                    found_archives.append((domain, url))
+                    # Anlık olarak dosyaya ekle
+                    await self.append_result(domain, url)
                     pbar.set_postfix({"Bulunan": len(found_archives), "Bulunamayan": not_found_count})
                 else:
                     not_found_count += 1
@@ -128,6 +158,34 @@ class ArchiveChecker:
             
         except Exception as e:
             logger.error(f"Sonuç kaydetme hatası: {e}")
+    
+    async def append_result(self, domain: str, url: str, output_file: str = "available_archives.txt"):
+        """
+        Tek bir sonucu dosyaya ekler (anlık yazma için)
+        
+        Args:
+            domain: Domain adı
+            url: Archive.zip URL'i
+            output_file: Çıktı dosyası adı
+        """
+        output_path = Path("data/results") / output_file
+        output_path.parent.mkdir(exist_ok=True)
+        
+        try:
+            # Dosya yoksa header'ı oluştur
+            if not output_path.exists():
+                async with aiofiles.open(output_path, 'w', encoding='utf-8') as f:
+                    await f.write("# Archive.zip Bulunan Domain'ler\n")
+                    await f.write("# Format: domain - url\n\n")
+            
+            # Sonucu dosyaya ekle
+            async with aiofiles.open(output_path, 'a', encoding='utf-8') as f:
+                await f.write(f"{domain} - {url}\n")
+            
+            logger.debug(f"Sonuç eklendi: {domain} - {url}")
+            
+        except Exception as e:
+            logger.error(f"Sonuç ekleme hatası: {e}")
     
     def get_stats(self, total_domains: int, found_count: int) -> dict:
         """
