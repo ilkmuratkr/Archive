@@ -1,0 +1,7 @@
+# Örnek Domain Listesi
+# Bu dosyayı kendi domain listenizle değiştirin
+
+example.com
+test.com
+demo.org
+sample.net 
