@@ -53,19 +53,19 @@ echo "test.com" >> data/domains/domains.txt
 
 ### Temel Kullanım
 ```bash
-python src/main.py domains.txt
+PYTHONPATH=. python3 src/main.py domains.txt
 ```
 
 ### Gelişmiş Kullanım
 ```bash
 # 20 worker ile çalıştır
-python src/main.py domains.txt --workers 20
+PYTHONPATH=. python3 src/main.py domains.txt --workers 20
 
 # 60 saniye timeout ile çalıştır
-python src/main.py domains.txt --timeout 60
+PYTHONPATH=. python3 src/main.py domains.txt --timeout 60
 
 # Hem worker hem timeout ayarla
-python src/main.py domains.txt --workers 15 --timeout 45
+PYTHONPATH=. python3 src/main.py domains.txt --workers 15 --timeout 45
 ```
 
 ## Proje Yapısı
